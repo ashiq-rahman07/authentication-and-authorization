@@ -14,7 +14,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/v1');
+// app.use('/api/v1');
 
 // Test route
 app.get('/', (req: Request, res: Response) => {
@@ -26,7 +26,7 @@ app.get('/', (req: Request, res: Response) => {
 
   res.status(StatusCodes.OK).json({
     success: true,
-    message: 'Welcome to the Base Finder',
+    message: 'Welcome to User Authentication and Authorization Application',
     version: '1.0.0',
     clientDetails: {
       ipAddress: clientIp,
