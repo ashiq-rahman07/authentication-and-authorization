@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const token = res.data.data.accessToken;
 
       Cookies.set('authToken', token, {
-        domain: '.localhost', // ✅ Must match backend cookie
+        domain: '.authentication-and-authorization-amber.vercel.app', // ✅ Must match backend cookie
         expires: rememberMe ? 7 : 0.0208,
         secure: false,
         sameSite: 'lax',

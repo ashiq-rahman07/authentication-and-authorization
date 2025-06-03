@@ -6,6 +6,7 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { AuthService } from './auth.service';
 import { StatusCodes } from 'http-status-codes';
+import config from '../../config';
 
 
 const loginUser = catchAsync(async (req, res) => {
@@ -13,10 +14,11 @@ const loginUser = catchAsync(async (req, res) => {
   const result = await AuthService.loginUser(req.body);
   // console.log(result)
   const { accessToken} = result;
+
 res.cookie("token", accessToken, {
       httpOnly: true,
       secure: false, // set to true in production with HTTPS
-      domain: ".localhost", // ⬅️ important for cross-subdomain
+      domain: `${config.cookie_domain}`, // ⬅️ important for cross-subdomain
       sameSite: "lax",
       maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : 30 * 60 * 1000,
     });

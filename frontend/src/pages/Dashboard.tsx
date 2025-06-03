@@ -2,19 +2,15 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from '@/contexts/AuthContext';
-import { User, LogOut, Store, Sparkles, ArrowRight, Crown, Star } from 'lucide-react';
-
-import LogOutConfirm from '@/components/dialog/LogOutConfirm';
-import Footer from '@/components/Footer';
-import DashBg from '@/components/animatedbg/DashBg';
-import DasNav from '@/components/DasNav';
+import { User, LogOut, Store, Sparkles, ArrowRight, Crown, Star} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user} = useAuth();
+  const { user, logout } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
- 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleShopClick = (shopName: string) => {
     // Redirect to subdomain
@@ -24,16 +20,59 @@ const Dashboard = () => {
     window.location.href = subdomainUrl;
   };
 
-
+  const handleLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
+  };
 
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 relative overflow-hidden">
       {/* Multi-layered animated background */}
-  <DashBg/>
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-indigo-500/30 to-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-blue-500/30 to-cyan-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-gradient-to-br from-violet-500/15 to-indigo-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/3 w-72 h-72 bg-gradient-to-br from-purple-500/15 to-fuchsia-500/20 rounded-full blur-3xl" />
+        
+        {/* Enhanced floating particles */}
+        <div className="absolute top-20 left-1/4 w-3 h-3 bg-indigo-400 rounded-full animate-ping" />
+        <div className="absolute top-40 right-1/3 w-2 h-2 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '1s'}} />
+        <div className="absolute bottom-32 left-1/3 w-4 h-4 bg-violet-400 rounded-full animate-ping" style={{animationDelay: '2s'}} />
+        <div className="absolute top-3/4 right-1/4 w-2 h-2 bg-cyan-400 rounded-full animate-ping" style={{animationDelay: '3s'}} />
+      </div>
 
-    <DasNav setShowProfile={setShowProfile} />
+      <header className="relative z-10 bg-black/30 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-24">
+            <Link to={'/'}>
+              <div className="flex items-center gap-4">
+                <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-xl shadow-indigo-500/50">
+                  <Store className="h-8 w-8 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
+                  Multi-Shop Dashboard
+                </h1>
+              </div>    
+            </Link>
+         
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowProfile(true)}
+              className="flex items-center gap-4 text-white hover:bg-white/20 backdrop-blur-sm px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105"
+            >
+              <Avatar className="h-12 w-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-xl shadow-indigo-500/50">
+                <AvatarFallback className="bg-transparent">
+                  <User className="h-6 w-6 text-white" />
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden sm:inline font-semibold text-lg">{user.username}</span>
+            </Button>
+          </div>
+        </div>
+      </header>
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-16">
@@ -43,7 +82,7 @@ const Dashboard = () => {
             <Star className="h-4 w-4 text-purple-300" />
           </div>
           
-          <h2 className="text-5xl font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent mb-6">
+          <h2 className="text-6xl font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent mb-6">
             Welcome back, {user.username}!
           </h2>
           <p className="text-2xl text-gray-300">Select a shop to access its dashboard</p>
@@ -125,7 +164,7 @@ const Dashboard = () => {
             <div className="pt-6 border-t border-gradient-to-r from-transparent via-slate-600 to-transparent">
               <Button 
                 variant="destructive" 
-                // onClick={() => setShowLogoutConfirm(true)}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="w-full flex items-center gap-3 h-14 bg-red-600/80 hover:bg-red-600 shadow-xl shadow-red-500/50 text-lg font-bold"
               >
                 <LogOut className="h-5 w-5" />
@@ -137,9 +176,24 @@ const Dashboard = () => {
       </Dialog>
 
       {/* Logout Confirmation Dialog */}
-      <LogOutConfirm />
-
-      <Footer/>
+      <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+        <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-800/95 via-red-900/70 to-slate-900/95 backdrop-blur-xl border border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">Confirm Logout</DialogTitle>
+            <DialogDescription className="text-gray-300 text-lg">
+              Are you sure you want to logout? You'll need to sign in again to access your shops.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-4 justify-end pt-6">
+            <Button variant="outline" onClick={() => setShowLogoutConfirm(false)} className="border-slate-600 bg-transparent text-white hover:bg-slate-700/60 px-6 py-3">
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleLogout} className="bg-red-600/80 hover:bg-red-600 shadow-xl shadow-red-500/50 px-6 py-3">
+              Logout
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
