@@ -1,54 +1,32 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/contexts/AuthContext';
-import { Store, ArrowLeft, Loader2, Crown, Sparkles, TrendingUp, Users, Package, Star, Globe } from 'lucide-react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import { Store, ArrowLeft, Loader2, Crown, Sparkles,TrendingUp, Users, Package, Star, Globe } from 'lucide-react';
+import { getSubdomain } from '@/utils/getSubdomain';
 
 const ShopDashboard = () => {
-  // const { user, loading: authLoading} = useAuth();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [shopName, setShopName] = useState('');
-   const [error, setError] = useState('');
-   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
-console.log(user)
+  const { user, loading } = useAuth();
+  console.log(user)
+  const [authorized, setAuthorized] = useState(false);
+  const shopName = getSubdomain();
+
   useEffect(() => {
-     const subdomain = window.location.hostname.split('.')[0];
-    setShopName(subdomain);
-
-  const checkAuthStatus = async () => {
-    setLoading(true);
-    try {
-      const token = Cookies.get('authToken');
-      if (!token) {
-    
-        return;
-      }
-      // Optionally, verify token with backend or decode it
-      // Here, we fetch user profile from backend
-      const res = await axios.get(`${baseUrl}/user/my-profile`);
-   console.log(res.data.data);
-      setUser(res.data.data);
-    } catch (error: any) {
-      setUser(null);
-      Cookies.remove('authToken');
+    if (!loading && user && shopName) {
+      const ownsShop = user.shopNames.some(name => name.toLowerCase() === shopName.toLowerCase());
+      setAuthorized(ownsShop);
     }
-    setLoading(false);
-  };
-
-   checkAuthStatus();
-  }, []);
+  }, [loading, user, shopName]);
 
   const handleBackToDashboard = () => {
-    window.location.href = `${window.location.protocol}//localhost:${window.location.port || '5173'}/dashboard`;
+    window.location.href = `${window.location.protocol}//localhost:${window.location.port || '8080'}/dashboard`;
   };
 
-  if (loading) {
+  const handleSignIn = () => {
+    window.location.href = `${window.location.protocol}//localhost:${window.location.port || '8080'}/signin`;
+  };
+
+  if ( loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-emerald-950 to-teal-950 relative overflow-hidden">
         {/* Background decorative elements */}
@@ -64,6 +42,7 @@ console.log(user)
               <div className="absolute inset-0 h-20 w-20 bg-emerald-400/30 rounded-full animate-ping" />
             </div>
             <p className="text-gray-300 font-semibold text-xl">Verifying authentication...</p>
+            <p className="text-gray-400 text-sm mt-2">Checking cross-domain session</p>
           </CardContent>
         </Card>
       </div>
@@ -92,25 +71,36 @@ console.log(user)
             <CardTitle className="text-4xl font-bold bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
               Access Denied
             </CardTitle>
+            <div className="text-center mt-10">Please login to view {authorized} shop</div>;
           </CardHeader>
           <CardContent className="text-center space-y-8">
             <p className="text-gray-300 text-xl">You need to be logged in to access this shop.</p>
-            <Button 
-              onClick={() => window.location.href = '/signin'}
-              className="w-full h-14 bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-700 hover:via-rose-700 hover:to-pink-700 text-white shadow-xl shadow-red-500/50 text-lg font-bold"
-            >
-              Sign In
-            </Button>
+            <div className="space-y-4">
+              <Button 
+                onClick={handleSignIn}
+                className="w-full h-14 bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-700 hover:via-rose-700 hover:to-pink-700 text-white shadow-xl shadow-red-500/50 text-lg font-bold"
+              >
+                Sign In
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleBackToDashboard}
+                className="w-full h-12 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Main Site
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
-console.log(user)
-  // Check if user owns this shop
-  const ownsShop = user.shopNames.some(name => name.toLowerCase() === shopName.toLowerCase());
 
-  if (!ownsShop) {
+  // Check if user owns this shop
+  // const ownsShop = user.shopNames.some(name => name.toLowerCase() === shopName.toLowerCase());
+
+  if (!authorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-orange-950 to-amber-950 relative overflow-hidden">
         {/* Background decorative elements */}

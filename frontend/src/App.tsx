@@ -14,7 +14,7 @@ import NotFound from './pages/NotFound';
 
 function App() {
  // Check if we're on a subdomain
-  const hostname = window.location.hostname;
+ const hostname = window.location.hostname;
   const isSubdomain = hostname.match(/^([^.]+)\.localhost$/);
 
   return (

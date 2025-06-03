@@ -8,10 +8,10 @@ export default defineConfig({
     server: {
     host: true, // 👈 allows subdomain access
     port: 5173,
-    cors: {
-      origin: true,
-      credentials: true,
-    },
+    // cors: {
+    //   origin: true,
+    //   credentials: true,
+    // },
   },
   resolve: {
     alias: {

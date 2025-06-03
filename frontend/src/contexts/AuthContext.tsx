@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'sonner';
 import Cookies from 'js-cookie';
 import axios from '@/api/axios';
+import { toast } from 'sonner';
 
 interface User {
   id: string;
@@ -14,34 +13,24 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  loading: boolean;
+  isAuthenticated: boolean;
   login: (username: string, password: string, rememberMe: boolean) => Promise<boolean>;
   signup: (username: string, password: string, shopNames: string[]) => Promise<boolean>;
   logout: () => void;
-  loading: boolean;
-  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuthStatus();
-    // Listen for token changes (e.g., logout in another tab)
-    window.addEventListener('storage', checkAuthStatus);
-    return () => window.removeEventListener('storage', checkAuthStatus);
-  }, []);
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 
   const checkAuthStatus = async () => {
     setLoading(true);
@@ -49,71 +38,66 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/
       const token = Cookies.get('authToken');
       if (!token) {
         setUser(null);
-        setLoading(false);
-        return;
+      } else {
+        const res = await axios.get('/user/my-profile');
+        setUser(res.data.data);
       }
-      // Optionally, verify token with backend or decode it
-      // Here, we fetch user profile from backend
-      const res = await axios.get(`${baseUrl}/user/my-profile`);
-      console.log(res.data.data);
-      setUser(res.data.data);
-    } catch (error: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
       setUser(null);
       Cookies.remove('authToken');
     }
     setLoading(false);
   };
 
-  const signup = async (username: string, password: string, shopNames: string[]): Promise<boolean> => {
+  useEffect(() => {
+    checkAuthStatus();
+    window.addEventListener('storage', checkAuthStatus);
+    return () => window.removeEventListener('storage', checkAuthStatus);
+  }, []);
+
+  const signup = async (username: string, password: string, shopNames: string[]) => {
     try {
-      const res = await axios.post(`${baseUrl}/user/register`, { username, password, shopNames });
-      if (res.data.success) {
-        toast('Your account has been created successfully!');
-        return true;
-      }
-      toast(res.data.message || 'Signup failed');
-      return false;
-    } catch (error: any) {
-      toast(error.response?.data?.message || 'Signup failed');
+      const res = await axios.post('/user/register', { username, password, shopNames });
+      toast('Signup successful!');
+      return res.data.success;
+    } catch (err: any) {
+      toast(err.response?.data?.message || 'Signup failed');
       return false;
     }
   };
 
-  const login = async (username: string, password: string, rememberMe: boolean): Promise<boolean> => {
+  const login = async (username: string, password: string, rememberMe: boolean) => {
     try {
-      const res = await axios.post(`${baseUrl}/auth/login`, { username, password, rememberMe });
+      const res = await axios.post('/auth/login', { username, password, rememberMe });
+      const token = res.data.data.accessToken;
 
-      const { accessToken } = res.data.data;
-      // Set token in cookies
-      Cookies.set('authToken', accessToken, {
-        expires: rememberMe ? 7 : 0.0208, // 7 days or ~30 minutes
-        secure: true,
-        sameSite: 'strict',
+      Cookies.set('authToken', token, {
+        domain: '.localhost', // ✅ Must match backend cookie
+        expires: rememberMe ? 7 : 0.0208,
+        secure: false,
+        sameSite: 'lax',
+       
       });
-      setUser(user);
-      toast(`Login Successful | Welcome back, ${username}!`);
-      
+
+      await checkAuthStatus(); // ✅ Fetch user right after login
+      toast(`Welcome back, ${username}`);
       return true;
-    } catch (error: any) {
-      toast(error.response?.data?.message || 'Login failed');
+    } catch (err: any) {
+      toast(err.response?.data?.message || 'Login failed');
       return false;
     }
   };
 
   const logout = () => {
-    Cookies.remove('authToken');
+    Cookies.remove('authToken', { domain: '.localhost' }); // ✅ Clear for subdomains
     setUser(null);
-    toast('You have been logged out successfully.');
+    toast('Logged out successfully');
   };
 
-  const value = {
-    user,
-    login,
-    signup,
-    logout,
-    loading,
-    isAuthenticated: !!user,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, signup, logout }}>
+      {loading ? <div className="text-center mt-10">Loading...</div> : children}
+    </AuthContext.Provider>
+  );
 };
