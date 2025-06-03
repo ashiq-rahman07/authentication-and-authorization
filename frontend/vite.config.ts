@@ -6,14 +6,6 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   base: '/',
-    server: {
-    host: true, // 👈 allows subdomain access
-    port: 5173,
-    // cors: {
-    //   origin: true,
-    //   credentials: true,
-    // },
-  },
   build: {
     outDir: 'dist' 
   },
