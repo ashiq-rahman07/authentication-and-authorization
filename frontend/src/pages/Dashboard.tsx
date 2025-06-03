@@ -35,7 +35,7 @@ const Dashboard = () => {
 
     <DasNav setShowProfile={setShowProfile} />
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-16">
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600/30 via-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-indigo-500/40 rounded-full px-8 py-3 mb-8">
             <Crown className="h-5 w-5 text-indigo-300" />
