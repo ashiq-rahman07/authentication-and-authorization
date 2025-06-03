@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from '@/api/axios';
 import { toast } from 'sonner';
+import Loading from '@/components/Loading';
 
 interface User {
   id: string;
@@ -97,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, signup, logout }}>
-      {loading ? <div className="text-center mt-10">Loading...</div> : children}
+      {loading ? <Loading/> : children}
     </AuthContext.Provider>
   );
 };
