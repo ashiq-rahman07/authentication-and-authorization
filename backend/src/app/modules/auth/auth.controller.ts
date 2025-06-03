@@ -14,12 +14,13 @@ const loginUser = catchAsync(async (req, res) => {
   const result = await AuthService.loginUser(req.body);
   // console.log(result)
   const { accessToken} = result;
-
+const maxAge = remember ? 7 * 24 * 60 * 60 * 1000 : 30 * 60 * 1000; 
 res.cookie('authToken', accessToken, {
   httpOnly: true,
-  domain: `${config.cookie_domain}`, // Key for cross-subdomain
-  sameSite: 'lax',
+  // domain: `${config.cookie_domain}`, // Key for cross-subdomain
+  sameSite: 'none',
   secure: true,
+  maxAge
 });
   sendResponse(res, {
     success: true,
