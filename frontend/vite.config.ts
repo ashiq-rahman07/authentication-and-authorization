@@ -14,6 +14,9 @@ export default defineConfig({
     //   credentials: true,
     // },
   },
+  build: {
+    outDir: 'dist' 
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
