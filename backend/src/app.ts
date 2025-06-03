@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import globalErrorHandler from './app/middleware/globalErrorHandler';
 import notFound from './app/middleware/notFound';
 import router from './app/routes';
+import config from './app/config';
 
 const app: Application = express();
 
@@ -15,10 +16,7 @@ const app: Application = express();
 //   origin: 'http://localhost:5173', // adjust as needed
 //   credentials: true,
 // }));
-app.use(cors({
-  origin: (origin, callback) => callback(null, true),
-  credentials: true,
-}));
+app.use(cors({ origin: `${config.cors_url}`, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
