@@ -57,7 +57,9 @@ const getSingleUser = async (id: string) => {
 // };
 
  const getProfile = async (userId:string) => {
-  const user = await User.findById(userId).select('-password'); // Exclude password field from the result
+  
+  const user = await User.findById(userId).select('-password');
+  // Exclude password field from the result
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
   }

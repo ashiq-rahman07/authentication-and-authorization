@@ -39,9 +39,11 @@ const getSingleUsers = catchAsync(async (req, res) => {
 });
 
 const getProfile = catchAsync(async (req, res) => {
+    
   const user = req.user as IJwtPayload;
-  const result = await UserServices.getProfile(user.userId);
 
+  const result = await UserServices.getProfile(user.userId);
+console.log(result)
   sendResponse(res, {
     success: true,
     message: 'User profile retrieved successfully',

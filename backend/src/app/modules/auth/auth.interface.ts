@@ -1,7 +1,7 @@
 export interface IAuth {
   username: string;
   password: string;
-  rememberMe?: string ;
+  rememberMe?: boolean;
 }
 
 export interface IJwtPayload {

@@ -9,9 +9,17 @@ import { StatusCodes } from 'http-status-codes';
 
 
 const loginUser = catchAsync(async (req, res) => {
- 
+  const { remember } = req.body;
   const result = await AuthService.loginUser(req.body);
-
+  // console.log(result)
+  const { accessToken} = result;
+res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: false, // set to true in production with HTTPS
+      domain: ".localhost", // ⬅️ important for cross-subdomain
+      sameSite: "lax",
+      maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : 30 * 60 * 1000,
+    });
   sendResponse(res, {
     success: true,
     message: 'User profile retrieved successfully',

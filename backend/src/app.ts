@@ -9,7 +9,18 @@ import router from './app/routes';
 
 const app: Application = express();
 
-app.use(cors());
+// const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin.endsWith('.localhost:5173') || origin === 'http://localhost:5173') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

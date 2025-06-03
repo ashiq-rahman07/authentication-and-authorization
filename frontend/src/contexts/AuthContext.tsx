@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-
+import Cookies from 'js-cookie';
+import axios from '@/api/axios';
 
 interface User {
   id: string;
@@ -34,154 +37,73 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     checkAuthStatus();
+    // Listen for token changes (e.g., logout in another tab)
+    window.addEventListener('storage', checkAuthStatus);
+    return () => window.removeEventListener('storage', checkAuthStatus);
   }, []);
+const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
 
-  const checkAuthStatus = () => {
+  const checkAuthStatus = async () => {
+    setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      const rememberMe = localStorage.getItem('rememberMe') === 'true';
-      const loginTime = localStorage.getItem('loginTime');
-      
-      if (!token || !loginTime) {
+      const token = Cookies.get('authToken');
+      if (!token) {
+        setUser(null);
         setLoading(false);
         return;
       }
-
-      const now = Date.now();
-      const loginTimestamp = parseInt(loginTime);
-      const sessionDuration = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 30 * 60 * 1000; // 7 days or 30 minutes
-      
-      if (now - loginTimestamp > sessionDuration) {
-        logout();
-        setLoading(false);
-        return;
-      }
-
-      // Validate token and get user data
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        setUser(JSON.parse(userData));
-      }
-    } catch (error) {
-      console.error('Auth check error:', error);
-      logout();
+      // Optionally, verify token with backend or decode it
+      // Here, we fetch user profile from backend
+      const res = await axios.get(`${baseUrl}/user/my-profile`);
+      console.log(res.data.data);
+      setUser(res.data.data);
+    } catch (error: any) {
+      setUser(null);
+      Cookies.remove('authToken');
     }
     setLoading(false);
   };
 
-  const validatePassword = (password: string): boolean => {
-    const hasMinLength = password.length >= 8;
-    const hasNumber = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
-    return hasMinLength && hasNumber && hasSpecialChar;
-  };
-
-  const isShopNameTaken = (shopName: string, excludeUser?: string): boolean => {
-    const users = JSON.parse(localStorage.getItem('allUsers') || '[]');
-    return users.some((user: User) => 
-      user.username !== excludeUser && 
-      user.shopNames.some(name => name.toLowerCase() === shopName.toLowerCase())
-    );
-  };
-
   const signup = async (username: string, password: string, shopNames: string[]): Promise<boolean> => {
     try {
-      // Validation
-      if (!validatePassword(password)) {
-        toast("Invalid Password | Password must be at least 8 characters with at least one number and one special character.");
-        return false;
+      const res = await axios.post(`${baseUrl}/user/register`, { username, password, shopNames });
+      if (res.data.success) {
+        toast('Your account has been created successfully!');
+        return true;
       }
-
-      if (shopNames.length < 3) {
-        toast("Insufficient Shop Names | Please provide at least 3 shop names.");
-        return false;
-      }
-
-      // Check if username exists
-      const users = JSON.parse(localStorage.getItem('allUsers') || '[]');
-      if (users.some((user: User) => user.username === username)) {
-        toast("Username Taken This username is already registered.");
-        return false;
-      }
-
-      // Check for duplicate shop names
-      for (const shopName of shopNames) {
-        if (isShopNameTaken(shopName)) {
-          toast(`Shop Name Taken Shop name | ${shopName} is already taken by another user.`);
-          return false;
-        }
-      }
-
-      // Create new user
-      const newUser: User = {
-        id: Date.now().toString(),
-        username,
-        shopNames,
-        createdAt: new Date().toISOString()
-      };
-
-      // Save user
-      const updatedUsers = [...users, newUser];
-      localStorage.setItem('allUsers', JSON.stringify(updatedUsers));
-      localStorage.setItem('userPasswords', JSON.stringify({
-        ...JSON.parse(localStorage.getItem('userPasswords') || '{}'),
-        [username]: password
-      }));
-
-      toast("Your account has been created successfully!");
-
-      return true;
-    } catch (error) {
-      console.error('Signup error:', error);
-      toast("Signup Failed ,An error occurred during signup.");
+      toast(res.data.message || 'Signup failed');
+      return false;
+    } catch (error: any) {
+      toast(error.response?.data?.message || 'Signup failed');
       return false;
     }
   };
 
   const login = async (username: string, password: string, rememberMe: boolean): Promise<boolean> => {
     try {
-      const users = JSON.parse(localStorage.getItem('allUsers') || '[]');
-      const passwords = JSON.parse(localStorage.getItem('userPasswords') || '{}');
-      
-      const user = users.find((u: User) => u.username === username);
-      
-      if (!user) {
-        toast( "User Not Found ,No account found with this username.");
-        return false;
-      }
+      const res = await axios.post(`${baseUrl}/auth/login`, { username, password, rememberMe });
 
-      if (passwords[username] !== password) {
-        toast("Incorrect Password  The password you entered is incorrect.");
-        return false;
-      }
-
-      // Create session
-      const token = `auth_${Date.now()}_${Math.random()}`;
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('userData', JSON.stringify(user));
-      localStorage.setItem('loginTime', Date.now().toString());
-      localStorage.setItem('rememberMe', rememberMe.toString());
-
+      const { accessToken } = res.data.data;
+      // Set token in cookies
+      Cookies.set('authToken', accessToken, {
+        expires: rememberMe ? 7 : 0.0208, // 7 days or ~30 minutes
+        secure: true,
+        sameSite: 'strict',
+      });
       setUser(user);
-      
       toast(`Login Successful | Welcome back, ${username}!`);
-
+      
       return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      toast( "Login Failed An error occurred during login.");
+    } catch (error: any) {
+      toast(error.response?.data?.message || 'Login failed');
       return false;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('loginTime');
-    localStorage.removeItem('rememberMe');
+    Cookies.remove('authToken');
     setUser(null);
-    toast( "You have been logged out successfully.",);
+    toast('You have been logged out successfully.');
   };
 
   const value = {
@@ -190,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signup,
     logout,
     loading,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

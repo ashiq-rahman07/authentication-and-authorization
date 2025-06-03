@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -5,16 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/contexts/AuthContext';
-import { X, Plus, Store, Sparkles, User, Lock, Zap, Crown } from 'lucide-react';
+import { X, Plus, Store, Sparkles, User, Lock, Zap, Crown, Eye, EyeOff } from 'lucide-react';
 import AnimatedSignUp from '@/components/animatedbg/AnimatedSignUp';
+
+import { toast } from 'sonner';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [shopNames, setShopNames] = useState(['', '', '']);
   const [loading, setLoading] = useState(false);
-  const { signup } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+ 
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const addShopField = () => {
     setShopNames([...shopNames, '']);
@@ -38,16 +43,18 @@ const Signup = () => {
 
     const filteredShopNames = shopNames.filter(name => name.trim() !== '');
     if (filteredShopNames.length < 3) {
+      toast.error('Please provide at least 3 shop names.');
       setLoading(false);
       return;
     }
 
     const success = await signup(username, password, filteredShopNames);
+    setLoading(false);
     if (success) {
       navigate('/signin');
     }
-    setLoading(false);
   };
+  
 
   const getPasswordValidation = () => {
     const hasMinLength = password.length >= 8;
@@ -73,11 +80,11 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-purple-950 to-pink-950 p-4 relative overflow-hidden">
+    <div className="flex items-center justify-center bg-gradient-to-br from-slate-950 via-purple-950 to-pink-950 p-4 relative ">
       {/* Animated background */}
    <AnimatedSignUp/>
 
-      <Card className="w-full sm:w-[90vw] md:w-[80vw] lg:w-[60vw] xl:w-[50vw] max-h-[90vh] overflow-y-auto max-w-2xl relative z-10 bg-gradient-to-br from-slate-800/70 via-purple-900/40 to-slate-900/70 backdrop-blur-xl border border-purple-400/30 shadow-2xl shadow-purple-500/40">
+      <Card className="w-full sm:w-[90vw] md:w-[80vw] lg:w-[60vw] xl:w-[50vw]  max-w-2xl relative z-10 bg-gradient-to-br from-slate-800/70 via-purple-900/40 to-slate-900/70 backdrop-blur-xl border border-purple-400/30 shadow-2xl shadow-purple-500/40">
         <CardHeader className="text-center pb-8">
           <Link to={"/"}>
             <div className="flex justify-center mb-8">
@@ -132,15 +139,26 @@ const Signup = () => {
                 </div>
                 Password
               </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Enter your password"
-                className="h-14 bg-slate-700/60 border-2 border-slate-600/50 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/30 backdrop-blur-sm transition-all duration-300 hover:border-purple-500/50 text-md"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                  className="h-14 bg-slate-700/60 border-2 border-slate-600/50 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/30 backdrop-blur-sm transition-all duration-300 hover:border-purple-500/50 text-md pr-14"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-400 hover:text-purple-400 focus:outline-none"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
               {password && getPasswordValidation()}
             </div>
 

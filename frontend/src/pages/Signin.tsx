@@ -21,12 +21,13 @@ const Signin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    console.log(username, password, rememberMe);
     const success = await login(username, password, rememberMe);
+    console.log(success)
+    setLoading(false);
     if (success) {
       navigate('/dashboard');
     }
-    setLoading(false);
   };
 
   return (
