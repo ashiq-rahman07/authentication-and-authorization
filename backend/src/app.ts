@@ -3,9 +3,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import os from 'os';
 import { StatusCodes } from 'http-status-codes';
-// import router from './app/routes';
 import globalErrorHandler from './app/middleware/globalErrorHandler';
 import notFound from './app/middleware/notFound';
+import router from './app/routes';
 
 const app: Application = express();
 
@@ -14,7 +14,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use('/api/v1');
+app.use('/api/v1',router);
 
 // Test route
 app.get('/', (req: Request, res: Response) => {
