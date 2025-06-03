@@ -15,8 +15,9 @@ const Dashboard = () => {
   const handleShopClick = (shopName: string) => {
     // Redirect to subdomain
     const protocol = window.location.protocol;
-    const port = window.location.port ? `:${window.location.port}` : '';
-    const subdomainUrl = `${protocol}//${shopName.toLowerCase()}.localhost${port}`;
+    // const port = window.location.port ? `:${window.location.port}` : '';
+    // const subdomainUrl = `${protocol}//${shopName.toLowerCase()}.localhost${port}`;
+    const subdomainUrl = `${protocol}//${shopName.toLowerCase()}.authentication-and-authorization-amber.vercel.app`;
     window.location.href = subdomainUrl;
   };
 
