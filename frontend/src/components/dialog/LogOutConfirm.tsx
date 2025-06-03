@@ -5,11 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const LogOutConfirm = () => {
      const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-       const {  logout } = useAuth();
+          const {  logout} = useAuth();
+
         const handleLogout = () => {
-    logout();
-    setShowLogoutConfirm(false);
-  };
+                logout();
+                setShowLogoutConfirm(false);
+        };
+
   return (
     <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
         <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-800/95 via-red-900/70 to-slate-900/95 backdrop-blur-xl border border-white/20 text-white">
