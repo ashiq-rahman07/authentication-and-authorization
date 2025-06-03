@@ -4,12 +4,13 @@ import { TooltipProvider } from './components/ui/tooltip';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
-import ShopDashboard from './pages/ShopDashboard';
+// import ShopDashboard from './pages/ShopDashboard';
 import Signup from './pages/Signup';
 import Signin from './pages/Signin';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
+import ShopPage from './pages/ShopPage';
 // import TSignup from './pages/Testsignup';
 
 function App() {
@@ -27,7 +28,7 @@ function App() {
             <Routes>
               {isSubdomain ? (
                 // Subdomain routes
-                <Route path="/*" element={<ShopDashboard />} />
+                <Route path="/*" element={<ShopPage/>} />
               ) : (
                 // Main domain routes
                 <>

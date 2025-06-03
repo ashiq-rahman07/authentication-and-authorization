@@ -43,7 +43,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Button variant="outline" asChild className="border-white/30 text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105">
+                  <Button variant="outline" asChild className="border-white/30 bg-transparent text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105">
                     <Link to="/signin">Sign In</Link>
                   </Button>
                   <Button asChild className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white shadow-xl shadow-purple-500/50 transition-all duration-300 hover:scale-105">
