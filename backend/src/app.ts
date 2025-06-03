@@ -10,7 +10,10 @@ import config from './app/config';
 
 const app: Application = express();
 
-app.use(cors({ origin: `${config.cors_url}`, credentials: true }));
+app.use(cors({ 
+  origin: [`${config.cors_url}`, `${config.cookie_domain}`], 
+  credentials: true 
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

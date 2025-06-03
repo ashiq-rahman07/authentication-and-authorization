@@ -15,7 +15,12 @@ const loginUser = catchAsync(async (req, res) => {
   // console.log(result)
   const { accessToken} = result;
 
-
+res.cookie('authToken', accessToken, {
+  httpOnly: true,
+  domain: `${config.cookie_domain}`, // Key for cross-subdomain
+  sameSite: 'lax',
+  secure: true,
+});
   sendResponse(res, {
     success: true,
     message: 'User profile retrieved successfully',
