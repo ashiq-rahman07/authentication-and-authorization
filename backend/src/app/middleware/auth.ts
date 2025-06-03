@@ -1,17 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import config from '../config';
-
-
 import catchAsync from '../utils/catchAsync';
 import { StatusCodes } from 'http-status-codes';
+import AppError from '../errors/appError';
 
 
-
-
-
-
-const auth = ()=> {
+const authenticate = ()=> {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
 
@@ -41,4 +36,4 @@ const auth = ()=> {
   });
 }
 
-export default auth;
+export default authenticate;
